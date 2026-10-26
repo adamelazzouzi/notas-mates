@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de nota global mates</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #fafafa;
+            padding: 24px;
+            line-height: 1.5;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(180deg, #fafafa 0%, #a3a3a3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitulo {
+            color: #7a7a7a;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 32px;
+            padding: 16px;
+            background: #141414;
+            border: 1px solid #2e2e2e;
+            border-radius: 8px;
+        }
+        .input-group label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #a3a3a3;
+        }
+        .input-group input[type="number"] {
+            background: #1a1a1a;
+            border: 1px solid #2e2e2e;
+            color: #fafafa;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 16px;
+            width: 100px;
+            font-family: inherit;
+        }
+        .input-group input[type="number"]:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+        .input-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #10b981;
+            cursor: pointer;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #141414;
+            border: 1px solid #2e2e2e;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+        th {
+            background: #1a1a1a;
+            color: #a3a3a3;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #2e2e2e;
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #202020;
+            font-size: 14px;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:hover td {
+            background: #1a1a1a;
+        }
+        .nota {
+            font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+            font-weight: 700;
+            color: #10b981;
+        }
+        .imposible {
+            color: #ef4444;
+            font-weight: 700;
+        }
+        .cero {
+            color: #f59e0b;
+            font-weight: 700;
+        }
+        .leyenda-imposible {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ef4444;
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Calculadora de nota global mates</h1>
+<p class="subtitulo">
+    Fórmula: 30% parcial + 10% tareas + 60% global.
+</p>
+
+<div class="input-group">
+    <label>
+        Nota del parcial (0-10):
+        <input type="number" id="parcial" min="0" max="10" step="0.1" value="">
+    </label>
+    <label class="checkbox-label">
+        <input type="checkbox" id="tarea" checked>
+        ¿Has hecho las tareas? (10%)
+    </label>
+</div>
+
+<table id="resultado">
+    <thead>
+        <tr>
+            <th>Objetivo</th>
+            <th>Nota global necesaria</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<p class="leyenda-imposible">
+    “—” significa imposible.
+</p>
+
+<script>
+    const PESO_PARCIAL = 0.3;
+    const PESO_TAREA = 0.1;
+    const PESO_GLOBAL = 0.6;
+
+    const targets = [
+        { nombre: 'SF (5)', valor: 5 },
+        { nombre: 'BI (6)', valor: 6 },
+        { nombre: 'NT Bajo (7)', valor: 7 },
+        { nombre: 'NT Alto (8)', valor: 8 },
+        { nombre: 'SB (9)', valor: 9 }
+    ];
+
+    function calcular(parcial, tarea, target) {
+        const numerador = target - (PESO_PARCIAL * parcial) - (PESO_TAREA * tarea);
+        const global = numerador / PESO_GLOBAL;
+
+        if (global <= 0) return 0;
+        if (global > 10) return null;
+        return Math.ceil(global * 100) / 100;
+    }
+
+    function formatear(nota) {
+        if (nota === null) return '<span class="imposible">—</span>';
+        if (nota === 0) return '<span class="cero">0</span>';
+        return `<span class="nota">${nota.toFixed(2)}</span>`;
+    }
+
+    function actualizar() {
+        const parcialInput = document.getElementById('parcial');
+        const parcial = parseFloat(parcialInput.value);
+        const tarea = document.getElementById('tarea').checked ? 1 : 0;
+
+        const tbody = document.querySelector('#resultado tbody');
+
+        if (parcialInput.value.trim() === '' || isNaN(parcial)) {
+            tbody.innerHTML = '';
+            return;
+        }
+
+        tbody.innerHTML = targets.map(t => {
+            const nota = calcular(parcial, tarea, t.valor);
+            return `<tr><td>${t.nombre}</td><td>${formatear(nota)}</td></tr>`;
+        }).join('');
+    }
+
+    document.getElementById('parcial').addEventListener('input', actualizar);
+    document.getElementById('tarea').addEventListener('change', actualizar);
+
+    actualizar();
+</script>
+
+</body>
+</html>
