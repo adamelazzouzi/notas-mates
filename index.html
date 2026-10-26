@@ -128,7 +128,7 @@
 
 <h1>Calculadora de nota global mates</h1>
 <p class="subtitulo">
-    Fórmula: 30% parcial + 10% tareas + 60% global.
+    Fórmula: 30% parcial + 60% global + 1 punto si haces la tarea.
 </p>
 
 <div class="input-group">
@@ -138,7 +138,7 @@
     </label>
     <label class="checkbox-label">
         <input type="checkbox" id="tarea" checked>
-        ¿Has hecho las tareas? (10%)
+        ¿Has hecho las tareas? (suma 1 punto)
     </label>
 </div>
 
@@ -158,8 +158,8 @@
 
 <script>
     const PESO_PARCIAL = 0.3;
-    const PESO_TAREA = 0.1;
     const PESO_GLOBAL = 0.6;
+    const PUNTOS_TAREA = 1; // 1 punto entero sobre 10 si hace la tarea
 
     const targets = [
         { nombre: 'SF (5)', valor: 5 },
@@ -170,7 +170,7 @@
     ];
 
     function calcular(parcial, tarea, target) {
-        const numerador = target - (PESO_PARCIAL * parcial) - (PESO_TAREA * tarea);
+        const numerador = target - (PESO_PARCIAL * parcial) - (tarea ? PUNTOS_TAREA : 0);
         const global = numerador / PESO_GLOBAL;
 
         if (global <= 0) return 0;
@@ -187,7 +187,7 @@
     function actualizar() {
         const parcialInput = document.getElementById('parcial');
         const parcial = parseFloat(parcialInput.value);
-        const tarea = document.getElementById('tarea').checked ? 1 : 0;
+        const tarea = document.getElementById('tarea').checked;
 
         const tbody = document.querySelector('#resultado tbody');
 
